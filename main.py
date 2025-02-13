@@ -1,5 +1,5 @@
-from fastapi import FastAPI, HTTPException, Body
-import json
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 import pandas as pd
 import os
 
@@ -8,22 +8,27 @@ app = FastAPI()
 # Ruta del archivo Excel
 EXCEL_PATH = r"C:\Users\javii\OneDrive\Escritorio\Excel ocaso\contactos (2).xlsx"
 
+# Modelo de datos esperado en la API
+class DatosEmpresa(BaseModel):
+    Nombre: str
+    Dirección: str
+    Teléfono: str
+    Correo_electronico: str
+
 @app.get("/")
 def home():
     return {"message": "API funcionando correctamente"}
 
 @app.post("/guardar-excel")
-def guardar_datos_en_excel(datos: dict = Body(...)):
+def guardar_datos_en_excel(datos: DatosEmpresa):
     try:
-        # Verificar si el archivo existe
         if not os.path.exists(EXCEL_PATH):
             return {"status": "error", "message": "El archivo Excel no se encontró."}
 
-        # Leer el archivo Excel
         df = pd.read_excel(EXCEL_PATH)
 
-        # Convertir los datos en DataFrame
-        nuevo_df = pd.DataFrame([datos])
+        # Convertir los datos a DataFrame
+        nuevo_df = pd.DataFrame([datos.dict()])
 
         # Agregar los nuevos datos
         df = pd.concat([df, nuevo_df], ignore_index=True)
