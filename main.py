@@ -96,3 +96,21 @@ def extraer_info(url: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en la extracción: {str(e)}")
+
+@app.post("/generar-mensaje")
+def generar_mensaje(actividad: str):
+    try:
+        mensajes = {
+            "inmobiliaria": "Estimado cliente, queremos ofrecerle nuestro seguro especializado para inmobiliarias...",
+            "gestoria": "Como gestor, sabemos la importancia de proteger su negocio. Le ofrecemos una solución...",
+            "asesoria": "En su labor de asesor, contar con un seguro adecuado es fundamental. Le proponemos...",
+            "default": "Estimado cliente, tenemos una oferta especial para usted."
+        }
+
+        # Convertimos la actividad a minúsculas para evitar errores
+        mensaje = mensajes.get(actividad.lower(), mensajes["default"])
+
+        return {"mensaje": mensaje}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al generar el mensaje: {str(e)}")
