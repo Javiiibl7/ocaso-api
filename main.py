@@ -1,22 +1,14 @@
 from fastapi import FastAPI, HTTPException, Response
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pandas as pd
 import io
 import requests
 from bs4 import BeautifulSoup
+import validators
+import re
 
 # Definir la aplicación antes de las rutas
 app = FastAPI()
-
-# ✅ Habilitar CORS para evitar errores en Render
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Permite todas las conexiones (puedes restringirlo más adelante)
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Modelo de datos esperado para guardar en Excel
 class DatosEmpresa(BaseModel):
@@ -55,9 +47,19 @@ def descargar_excel():
     }
     return Response(output.getvalue(), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers=headers)
 
+# ✅ Función para limpiar y validar la URL
+def limpiar_url(url: str) -> str:
+    url = url.strip()  # Eliminar espacios en blanco
+    url = re.sub(r'[\"\']', '', url)  # Eliminar comillas dobles y simples
+    if not validators.url(url):
+        raise HTTPException(status_code=400, detail="URL inválida")
+    return url
+
 @app.get("/extraer-info")
 def extraer_info(url: str):
     try:
+        url = limpiar_url(url)  # Limpiar y validar la URL
+
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
         }
@@ -69,7 +71,7 @@ def extraer_info(url: str):
         soup = BeautifulSoup(response.text, "html.parser")
 
         # Extraer título de la página
-        nombre = soup.find("title").text if soup.find("title") else "No encontrado"
+        nombre = soup.find("title").text.strip() if soup.find("title") else "No encontrado"
 
         # Buscar enlaces que podrían ser teléfonos
         telefono = "No encontrado"
@@ -107,7 +109,7 @@ def extraer_info(url: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en la extracción: {str(e)}")
 
-# ✅ Recibir la actividad en el cuerpo del `POST`
+# ✅ Modelo de datos para la generación de mensajes
 class MensajeRequest(BaseModel):
     actividad: str
 
@@ -128,4 +130,3 @@ def generar_mensaje(request: MensajeRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al generar el mensaje: {str(e)}")
-
