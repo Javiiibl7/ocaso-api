@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Automatización de Contactos Ocaso",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "API para automatizar la recopilación de información de empresas, almacenamiento temporal de datos y generación de un archivo Excel descargable."
   },
   "servers": [
@@ -13,7 +13,7 @@
   ],
   "paths": {
     "/extraer-info": {
-      "post": {
+      "get": {  
         "operationId": "extraerInformacion",
         "summary": "Extraer información de contacto desde una URL",
         "parameters": [
@@ -38,11 +38,7 @@
                     "Nombre": { "type": "string" },
                     "Dirección": { "type": "string" },
                     "Teléfono": { "type": "string" },
-                    "Correo electrónico": { "type": "string" },
-                    "Sitio web": { "type": "string" },
-                    "Redes Sociales": { "type": "string" },
-                    "Contacto Principal": { "type": "string" },
-                    "Fecha de Contacto": { "type": "string", "format": "date" }
+                    "Correo": { "type": "string" }
                   }
                 }
               }
