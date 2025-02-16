@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Automatización de Contactos Ocaso",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "API para automatizar la recopilación de información de empresas, almacenamiento temporal de datos y generación de un archivo Excel descargable."
   },
   "servers": [
