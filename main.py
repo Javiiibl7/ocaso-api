@@ -5,10 +5,10 @@ import os
 
 app = FastAPI()
 
-# Ruta del archivo Excel
+# Ruta del archivo Excel donde se guardarán los datos
 EXCEL_PATH = r"C:\Users\javii\OneDrive\Escritorio\Excel ocaso\contactos (2).xlsx"
 
-# Modelo de datos esperado en la API
+# Modelo de datos esperado
 class DatosEmpresa(BaseModel):
     Nombre: str
     Dirección: str
@@ -22,9 +22,13 @@ def home():
 @app.post("/guardar-excel")
 def guardar_datos_en_excel(datos: DatosEmpresa):
     try:
+        # Verificar si el archivo Excel existe
         if not os.path.exists(EXCEL_PATH):
-            return {"status": "error", "message": "El archivo Excel no se encontró."}
+            # Si no existe, crear un nuevo archivo con encabezados
+            df = pd.DataFrame(columns=["Nombre", "Dirección", "Teléfono", "Correo electrónico"])
+            df.to_excel(EXCEL_PATH, index=False)
 
+        # Leer el archivo existente
         df = pd.read_excel(EXCEL_PATH)
 
         # Convertir los datos a DataFrame
@@ -40,6 +44,6 @@ def guardar_datos_en_excel(datos: DatosEmpresa):
 
     except PermissionError:
         raise HTTPException(status_code=500, detail="No se puede acceder al archivo Excel. Ciérralo si está abierto.")
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error desconocido: {str(e)}")
