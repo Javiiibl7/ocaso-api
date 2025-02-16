@@ -1,0 +1,147 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Automatización de Contactos Ocaso",
+    "version": "1.1.0",
+    "description": "API para automatizar la recopilación de información de empresas, almacenamiento temporal de datos y generación de un archivo Excel descargable."
+  },
+  "servers": [
+    {
+      "url": "https://ocaso-api-1.onrender.com",
+      "description": "Servidor en Render para automatización de contactos Ocaso"
+    }
+  ],
+  "paths": {
+    "/extraer-info": {
+      "post": {
+        "operationId": "extraerInformacion",
+        "summary": "Extraer información de contacto desde una URL",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "description": "URL de la empresa",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Información extraída correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Nombre": { "type": "string" },
+                    "Dirección": { "type": "string" },
+                    "Teléfono": { "type": "string" },
+                    "Correo electrónico": { "type": "string" },
+                    "Sitio web": { "type": "string" },
+                    "Redes Sociales": { "type": "string" },
+                    "Contacto Principal": { "type": "string" },
+                    "Fecha de Contacto": { "type": "string", "format": "date" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/generar-mensaje": {
+      "post": {
+        "operationId": "generarMensajePersonalizado",
+        "summary": "Generar mensaje personalizado según la actividad de la empresa",
+        "parameters": [
+          {
+            "name": "actividad",
+            "in": "query",
+            "description": "Actividad principal de la empresa",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mensaje generado correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "mensaje": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/guardar-excel": {
+      "post": {
+        "operationId": "guardarDatosEnExcel",
+        "summary": "Guardar información temporalmente en la API",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Nombre": { "type": "string" },
+                  "Dirección": { "type": "string" },
+                  "Teléfono": { "type": "string" },
+                  "Correo_electronico": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Datos guardados temporalmente en la API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/descargar-excel": {
+      "get": {
+        "operationId": "descargarExcel",
+        "summary": "Generar y descargar un archivo Excel con los datos guardados",
+        "responses": {
+          "200": {
+            "description": "Archivo Excel generado correctamente",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No hay datos guardados para generar el archivo"
+          }
+        }
+      }
+    }
+  }
+}
