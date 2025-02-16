@@ -97,8 +97,12 @@ def extraer_info(url: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en la extracción: {str(e)}")
 
+# ✅ CORRECCIÓN: Recibir la actividad en el cuerpo del `POST`
+class MensajeRequest(BaseModel):
+    actividad: str
+
 @app.post("/generar-mensaje")
-def generar_mensaje(actividad: str):
+def generar_mensaje(request: MensajeRequest):
     try:
         mensajes = {
             "inmobiliaria": "Estimado cliente, queremos ofrecerle nuestro seguro especializado para inmobiliarias...",
@@ -108,7 +112,7 @@ def generar_mensaje(actividad: str):
         }
 
         # Convertimos la actividad a minúsculas para evitar errores
-        mensaje = mensajes.get(actividad.lower(), mensajes["default"])
+        mensaje = mensajes.get(request.actividad.lower(), mensajes["default"])
 
         return {"mensaje": mensaje}
 
