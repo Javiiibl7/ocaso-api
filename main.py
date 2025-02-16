@@ -38,13 +38,17 @@ def descargar_excel():
     
     # Crear archivo en memoria
     output = io.BytesIO()
-    df.to_excel(output, index=False, engine='openpyxl')
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False)
+
     output.seek(0)
 
     headers = {
-        'Content-Disposition': 'attachment; filename="datos_ocaso.xlsx"'
+        'Content-Disposition': 'attachment; filename="datos_ocaso.xlsx"',
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     }
-    return Response(output.getvalue(), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers=headers)
+    
+    return Response(output.getvalue(), headers=headers)
 
 # ✅ Función para limpiar y validar URL
 def limpiar_url(url: str) -> str:
