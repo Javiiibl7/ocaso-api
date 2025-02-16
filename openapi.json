@@ -43,6 +43,32 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Error en la validación de la URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error al intentar extraer la información",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": { "type": "string" }
+                  }
+                }
+              }
+            }
           }
         }
       }
