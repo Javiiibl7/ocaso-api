@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Response
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pandas as pd
 import io
@@ -7,6 +8,15 @@ from bs4 import BeautifulSoup
 
 # Definir la aplicación antes de las rutas
 app = FastAPI()
+
+# ✅ Habilitar CORS para evitar errores en Render
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permite todas las conexiones (puedes restringirlo más adelante)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Modelo de datos esperado para guardar en Excel
 class DatosEmpresa(BaseModel):
@@ -97,7 +107,7 @@ def extraer_info(url: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en la extracción: {str(e)}")
 
-# ✅ CORRECCIÓN: Recibir la actividad en el cuerpo del `POST`
+# ✅ Recibir la actividad en el cuerpo del `POST`
 class MensajeRequest(BaseModel):
     actividad: str
 
@@ -118,3 +128,4 @@ def generar_mensaje(request: MensajeRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al generar el mensaje: {str(e)}")
+
