@@ -1,12 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
 import pandas as pd
-import os
+import io
 
 app = FastAPI()
-
-# Ruta del nuevo archivo Excel
-EXCEL_PATH = r"C:\Users\javii\OneDrive\Escritorio\Excel ocaso\Nuevos contactos .xlsx"
 
 # Modelo de datos esperado
 class DatosEmpresa(BaseModel):
@@ -15,39 +12,33 @@ class DatosEmpresa(BaseModel):
     Teléfono: str
     Correo_electronico: str
 
+# Almacenar datos en memoria (temporal)
+datos_guardados = []
+
 @app.get("/")
 def home():
     return {"message": "API funcionando correctamente"}
 
 @app.post("/guardar-excel")
 def guardar_datos_en_excel(datos: DatosEmpresa):
-    try:
-        print(f"Intentando guardar datos: {datos}")  # 🔍 Depuración
+    datos_guardados.append(datos.dict())  # Guardar datos en memoria
+    return {"status": "success", "message": "Datos guardados temporalmente en la API"}
 
-        # Verificar si el archivo Excel existe
-        if not os.path.exists(EXCEL_PATH):
-            print("📂 Archivo Excel no encontrado, creándolo...")
-            df = pd.DataFrame(columns=["Nombre", "Dirección", "Teléfono", "Correo electrónico"])
-            df.to_excel(EXCEL_PATH, index=False)
+@app.get("/descargar-excel")
+def descargar_excel():
+    if not datos_guardados:
+        raise HTTPException(status_code=404, detail="No hay datos guardados")
 
-        print("📖 Leyendo archivo Excel...")
-        df = pd.read_excel(EXCEL_PATH)
+    df = pd.DataFrame(datos_guardados)
+    
+    # Crear archivo en memoria
+    output = io.BytesIO()
+    df.to_excel(output, index=False, engine='openpyxl')
+    output.seek(0)
 
-        print(f"📄 Datos antes de agregar: {df}")  # 🔍 Ver los datos antes de agregar
-        nuevo_df = pd.DataFrame([datos.dict()])
-        df = pd.concat([df, nuevo_df], ignore_index=True)
+    # Enviar archivo al usuario
+    headers = {
+        'Content-Disposition': 'attachment; filename="datos_ocaso.xlsx"'
+    }
+    return Response(output.getvalue(), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers=headers)
 
-        print(f"✅ Guardando nuevos datos en Excel...")
-        df.to_excel(EXCEL_PATH, index=False)
-
-        print(f"✔️ Datos guardados correctamente en {EXCEL_PATH}")
-
-        return {"status": "success", "archivo": EXCEL_PATH}
-
-    except PermissionError:
-        print("❌ Error: No se puede escribir en el archivo. ¿Está abierto?")
-        raise HTTPException(status_code=500, detail="No se puede acceder al archivo Excel. Ciérralo si está abierto.")
-
-    except Exception as e:
-        print(f"⚠️ Error desconocido: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error desconocido: {str(e)}")
