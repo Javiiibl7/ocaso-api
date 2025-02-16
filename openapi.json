@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Automatización de Contactos Ocaso",
-    "version": "1.1.1",
+    "version": "1.1.0",
     "description": "API para automatizar la recopilación de información de empresas, almacenamiento temporal de datos y generación de un archivo Excel descargable."
   },
   "servers": [
@@ -13,7 +13,7 @@
   ],
   "paths": {
     "/extraer-info": {
-      "get": {  
+      "get": {
         "operationId": "extraerInformacion",
         "summary": "Extraer información de contacto desde una URL",
         "parameters": [
@@ -51,17 +51,23 @@
       "post": {
         "operationId": "generarMensajePersonalizado",
         "summary": "Generar mensaje personalizado según la actividad de la empresa",
-        "parameters": [
-          {
-            "name": "actividad",
-            "in": "query",
-            "description": "Actividad principal de la empresa",
-            "required": true,
-            "schema": {
-              "type": "string"
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "actividad": {
+                    "type": "string",
+                    "description": "Actividad principal de la empresa"
+                  }
+                },
+                "required": ["actividad"]
+              }
             }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "Mensaje generado correctamente",
