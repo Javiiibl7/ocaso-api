@@ -6,6 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 import validators
 import re
+import os
 
 # Definir la aplicación
 app = FastAPI()
@@ -35,17 +36,21 @@ def descargar_excel():
         raise HTTPException(status_code=404, detail="No hay datos guardados")
 
     df = pd.DataFrame(datos_guardados)
-    
-    # Crear archivo en memoria
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name="Datos")
-        writer.close()  # Asegurar que el archivo se escriba completamente
 
-    output.seek(0)  # Reiniciar el puntero al inicio del archivo
+    # Guardar en un archivo físico antes de enviarlo
+    ruta_archivo = r"C:\Users\javii\OneDrive\Documentos\ocaso-api\datos_ocaso.xlsx"
+    df.to_excel(ruta_archivo, index=False, engine="openpyxl")
+
+    # Verificar si el archivo se ha creado
+    if not os.path.exists(ruta_archivo):
+        raise HTTPException(status_code=500, detail="Error al generar el archivo Excel")
+
+    # Leer el archivo guardado para enviarlo correctamente
+    with open(ruta_archivo, "rb") as f:
+        contenido = f.read()
 
     return Response(
-        content=output.getvalue(),
+        content=contenido,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={
             "Content-Disposition": "attachment; filename=datos_ocaso.xlsx"
